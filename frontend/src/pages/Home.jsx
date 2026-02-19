@@ -2,24 +2,60 @@ import React, { useEffect, useState } from "react";
 import Navbar from "../components/Navbar";
 import Background from "../components/Background";
 import Hero from "../components/Hero";
+import Products from "./Products";
+import OurPolicy from "../components/OurPolicy";
+import NewLetterBox from "../components/NewLetterBox";
+import Footer from "../components/Footer";
 
 function Home() {
-  let heroData = [
+  const heroData = [
     {
-      text1: "Discover, collect, and",
-      text2: "sell extraordinary NFTs",
+      text1: (
+        <>
+          <span className="block sm:inline">Discover, collect, and</span>
+        </>
+      ),
+      text2: (
+        <>
+          <span className="block sm:inline">sell extraordinary NFTs</span>
+        </>
+      ),
     },
     {
-      text1: "Digital art and",
-      text2: "collectibles",
+      text1: (
+        <>
+          <span className="block sm:inline">Digital art and</span>
+        </>
+      ),
+      text2: (
+        <>
+          <span className="block sm:inline">collectibles</span>
+        </>
+      ),
     },
     {
-      text1: "Create, sell and",
-      text2: "collect your own NFTs",
+      text1: (
+        <>
+          <span className="block sm:inline">Create, sell and</span>
+        </>
+      ),
+      text2: (
+        <>
+          <span className="block sm:inline">collect your own NFTs</span>
+        </>
+      ),
     },
     {
-      text1: "The best place to",
-      text2: "buy and sell NFTs",
+      text1: (
+        <>
+          <span className="block sm:inline">The best place to</span>
+        </>
+      ),
+      text2: (
+        <>
+          <span className="block sm:inline">buy and sell NFTs</span>
+        </>
+      ),
     },
   ];
 
@@ -34,8 +70,8 @@ function Home() {
   }, [heroData.length]);
 
   return (
-    <div className="overflow-x-hidden relative top-[70px] ">
-      <div className="w-[100vw] fixed lg:h-[100vh] md:h-[100vh] sm:h-[40vh] h-[100vh] bg-gradient-to-l from-[#141414] to-[#0c2025]">
+    <div className="overflow-x-hidden relative top-[70px] sm:top-[60px]">
+      <div className="w-[100vw] relative h-[100vh] sm:h-[50vh] md:h-[60vh] lg:h-[100vh] bg-gradient-to-l from-[#141414] to-[#0c2025]">
         <Navbar />
         <Background heroCount={heroCount} />
         <Hero
@@ -44,6 +80,10 @@ function Home() {
           heroData={heroData[heroCount]}
         />
       </div>
+      <Products />
+      <OurPolicy />
+      <NewLetterBox />
+      <Footer />
     </div>
   );
 }

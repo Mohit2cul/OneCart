@@ -1,6 +1,7 @@
 import express from "express";
-import { addProduct } from "../controller/product.controller.js";
+import { addProduct, listProducts, removeProduct } from "../controller/product.controller.js";
 import upload from "../middleware/multer.js";
+// import { adminAuth } from "../middleware/adminAuth.js";
 
 let productRoute = express.Router();
 
@@ -26,5 +27,8 @@ productRoute.post(
   ]),
   addProduct
 );
+
+productRoute.get("/list", listProducts);
+productRoute.post("/remove/:id", removeProduct);
 
 export default productRoute;

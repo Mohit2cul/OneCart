@@ -4,8 +4,8 @@ import { Product } from "../models/product.model.js";
 export const addProduct = async (req, res) => {
     try {
         let {name, description, category, price, subCategory, sizes, bestSeller} = req.body;
-        console.log("Request Body:", req.body);
-        console.log("Request Files:", req.files);
+        // console.log("Request Body:", req.body);
+        // console.log("Request Files:", req.files);
 
 
         // Basic validation
@@ -41,5 +41,26 @@ export const addProduct = async (req, res) => {
     } catch (error) {
         console.error("Add Product Backend Error:", error);
         return res.status(500).json({message: "Product creation failed", error: error?.message || error});
+    }
+}
+
+export const listProducts = async (req, res) => {
+    try {
+        const products = await Product.find({});
+        return res.status(200).json({products}); 
+    } catch (error) {
+        console.error("List Products Backend Error:", error);
+        return res.status(500).json({message: "Product retrieval failed", error: error?.message || error});
+    }
+}
+
+export const removeProduct = async (req, res) => {
+    try {
+        let {id} = req.params;
+        const product = await Product.findByIdAndDelete(id);
+        return res.status(200).json({message: "Product deleted successfully", product});
+    } catch (error) {
+        console.log("Remove Product Backend Error:", error);
+        return res.status(500).json({message: "Product deletion failed", error: error?.message || error});
     }
 }

@@ -6,16 +6,16 @@ import back4 from "../assets/back4.png"
 
 function Background({ heroCount }) {
   if (heroCount === 0) {
-    return <img src={back2} alt="" className="lg:pr-20 w-[30%] h-[90%] object-contain float-right overflow-auto" />
+    return <img src={back2} alt="" className="w-[50%] sm:w-[45%] md:w-[35%] lg:w-[30%] h-[60%] sm:h-[70%] md:h-[80%] lg:h-[90%] object-contain float-right overflow-auto pr-2 sm:pr-4 md:pr-8 lg:pr-20" />
   }
   else if (heroCount === 1) {
-    return <img src={back1} alt="" className="lg:pr-20 w-[30%] h-[90%] object-contain float-right overflow-auto" />
+    return <img src={back1} alt="" className="w-[50%] sm:w-[45%] md:w-[35%] lg:w-[30%] h-[60%] sm:h-[70%] md:h-[80%] lg:h-[90%] object-contain float-right overflow-auto pr-2 sm:pr-4 md:pr-8 lg:pr-20" />
   }
   else if (heroCount === 2) {
-    return <img src={back3} alt="" className="pr-20 w-[30%] h-[90%] object-contain float-right overflow-auto" />
+    return <img src={back3} alt="" className="w-[50%] sm:w-[45%] md:w-[35%] lg:w-[30%] h-[60%] sm:h-[70%] md:h-[80%] lg:h-[90%] object-contain float-right overflow-auto pr-2 sm:pr-4 md:pr-8 lg:pr-20" />
   }
   else if (heroCount === 3) {
-    return <img src={back4} alt="" className="pr-20 w-[30%] h-[90%] object-contain float-right overflow-auto" />
+    return <img src={back4} alt="" className="w-[50%] sm:w-[45%] md:w-[35%] lg:w-[30%] h-[60%] sm:h-[70%] md:h-[80%] lg:h-[90%] object-contain float-right overflow-auto pr-2 sm:pr-4 md:pr-8 lg:pr-20" />
   }
 
 }

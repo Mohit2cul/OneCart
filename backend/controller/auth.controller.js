@@ -1,24 +1,8 @@
-// Get current user from cookie (basic version)
-export const getCurrentUser = async (req, res) => {
-  try {
-    // You may want to use JWT or session to identify the user. Here, we use email from query or body for demo.
-    const email = req.query.email || req.body?.email;
-    if (!email) {
-      return res.status(400).json({ message: "Email is required to get current user" });
-    }
-    const user = await User.findOne({ email }).select('-password');
-    if (!user) {
-      return res.status(404).json({ message: "User not found" });
-    }
-    return res.status(200).json(user);
-  } catch (error) {
-    return res.status(500).json({ message: `Get current user error: ${error.message}` });
-  }
-};
+import bcrypt from "bcryptjs";
 import User from "../models/user.model.js";
 import validator from "validator";
-import bcrypt from "bcryptjs";
-import { genToken, genToken1 } from "../config/token.js";
+import { genToken } from "../config/token.js";
+import jwt from "jsonwebtoken";
 
 export const register = async (req, res) => {
   try {
@@ -57,7 +41,30 @@ export const register = async (req, res) => {
   } catch (error) {
     return res.status(500).json({ message: `Register error: ${error.message}` });
   }
+}
+
+// Get current user from JWT token in cookie
+export const getCurrentUser = async (req, res) => {
+  try {
+    const token = req.cookies.token;
+    if (!token) {
+      return res.status(401).json({ message: "No token, authorization denied" });
+    }
+    
+  const decoded = jwt.verify(token, process.env.JWT_SECRET);
+  const user = await User.findById(decoded.userId).select('-password');
+    
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+    
+    return res.status(200).json(user);
+  } catch (error) {
+    return res.status(500).json({ message: `Get current user error: ${error.message}` });
+  }
 };
+
+
 
 export const login = async (req, res) => {
   try {
@@ -118,12 +125,12 @@ export const adminLogin = async (req, res) => {
   try {
     let { email, password } = req.body;
     if(email === process.env.ADMIN_EMAIL && password === process.env.ADMIN_PASSWORD){
-      let token = await genToken1(email);
+      let token = await genToken(email);
       res.cookie("token", token, {
         httpOnly: true,
         secure: false,
         sameSite: "Strict",
-        maxAge: 1  * 24 * 60 * 60 * 1000, // 7 days
+        maxAge: 1 * 24 * 60 * 60 * 1000, // 1 day
       });
       return res.status(201).json({ name: "Admin", email: process.env.ADMIN_EMAIL });
     }
@@ -131,4 +138,4 @@ export const adminLogin = async (req, res) => {
   } catch (error) {
     return res.status(500).json({ message: `Admin login error: ${error.message}` });
   }
-}
+};
