@@ -17,9 +17,9 @@ app.use(express.json());
 app.use(cookieParser());
 app.use(
   cors({
-    origin: ["http://localhost:5173", "http://localhost:5174"],
+    origin: "*",
     credentials: true,
-  })
+  }),
 );
 
 app.use("/api/auth", authRoutes);
@@ -39,7 +39,7 @@ const start = async () => {
       console.log(`Server is running on port ${port}`);
     });
   } catch (err) {
-    console.error('Failed to start server due to DB connection error:', err);
+    console.error("Failed to start server due to DB connection error:", err);
     process.exit(1);
   }
 };
