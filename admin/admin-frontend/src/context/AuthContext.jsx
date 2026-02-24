@@ -1,10 +1,11 @@
 import React from 'react'
 import { createContext } from 'react';
+import { SERVER_URL } from '../../../../frontend/utils/constant';
 
 export const authDataContext = createContext();
 
 function AuthContext({children}) {
-  let serverUrl = "http://localhost:8000";
+  let serverUrl = SERVER_URL;
 
   let value = {serverUrl}
 
