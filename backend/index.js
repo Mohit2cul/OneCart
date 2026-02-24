@@ -15,12 +15,7 @@ let port = process.env.PORT || 8000;
 let app = express();
 app.use(express.json());
 app.use(cookieParser());
-app.use(
-  cors({
-    origin: "*",
-    credentials: true,
-  }),
-);
+app.use(cors());
 
 app.use("/api/auth", authRoutes);
 app.use("/api/user", userRoutes);
