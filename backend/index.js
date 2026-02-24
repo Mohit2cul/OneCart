@@ -15,7 +15,13 @@ let port = process.env.PORT || 8000;
 let app = express();
 app.use(express.json());
 app.use(cookieParser());
-app.use(cors());
+app.use(cors({
+  origin:[
+    "https://onecart-frontend.vercel.app",
+    "https://onecart-admin-six.vercel.app"
+  ],
+  credentials: true
+}));
 
 app.use("/api/auth", authRoutes);
 app.use("/api/user", userRoutes);
