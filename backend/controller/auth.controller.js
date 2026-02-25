@@ -4,6 +4,14 @@ import validator from "validator";
 import { genToken } from "../config/token.js";
 import jwt from "jsonwebtoken";
 
+const isProd = process.env.NODE_ENV === "production";
+const getCookieOptions = (maxAgeMs) => ({
+  httpOnly: true,
+  secure: isProd,
+  sameSite: isProd ? "None" : "Strict",
+  maxAge: maxAgeMs,
+});
+
 export const register = async (req, res) => {
   try {
     const { name, email, password } = req.body;
@@ -23,12 +31,7 @@ export const register = async (req, res) => {
     try {
       const user = await User.create({ name, email, password: hashPassword });
       let token = await genToken(user._id);
-      res.cookie("token", token, {
-        httpOnly: true,
-        secure: false,
-        sameSite: "Strict",
-        maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
-      });
+      res.cookie("token", token, getCookieOptions(7 * 24 * 60 * 60 * 1000));
       return res.status(201).json(user);
     } catch (dbError) {
       // Handle duplicate key error (unique constraint)
@@ -81,12 +84,7 @@ export const login = async (req, res) => {
       return res.status(400).json({ message: "Invalid password" });
     }
     let token = await genToken(user._id);
-    res.cookie("token", token, {
-      httpOnly: true,
-      secure: false,
-      sameSite: "Strict",
-      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
-    });
+    res.cookie("token", token, getCookieOptions(7 * 24 * 60 * 60 * 1000));
     return res.status(201).json({ name: user.name, email: user.email });
   } catch (error) {
     return res.status(500).json({ message: `Login error: ${error}` });
@@ -97,8 +95,8 @@ export const logout = async (req, res) => {
   try {
     res.clearCookie("token", {
       httpOnly: true,
-      secure: false,
-      sameSite: "Strict",
+      secure: isProd,
+      sameSite: isProd ? "None" : "Strict",
     });
     console.log("User logged out successfully");
     return res.status(200).json({ message: "Logout successful" });
@@ -117,12 +115,7 @@ export const googleLogin = async (req, res) => {
     }
     
     let token = await genToken(user._id);
-    res.cookie("token", token, {
-      httpOnly: true,
-      secure: false,
-      sameSite: "Strict",
-      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
-    });
+    res.cookie("token", token, getCookieOptions(7 * 24 * 60 * 60 * 1000));
     return res.status(200).json({ name: user.name, email: user.email });
   } catch (error) {
     console.log("google login error:", error);
@@ -137,12 +130,7 @@ export const adminLogin = async (req, res) => {
       let token = jwt.sign({ adminEmail: email, role: "admin" }, process.env.JWT_SECRET, {
         expiresIn: "1d",
       });
-      res.cookie("token", token, {
-        httpOnly: true,
-        secure: false,
-        sameSite: "Strict",
-        maxAge: 1 * 24 * 60 * 60 * 1000, // 1 day
-      });
+      res.cookie("token", token, getCookieOptions(1 * 24 * 60 * 60 * 1000));
       return res.status(201).json({ name: "Admin", email: process.env.ADMIN_EMAIL });
     }
     return res.status(400).json({ message: "Invalid admin credentials" });

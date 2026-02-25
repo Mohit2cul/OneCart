@@ -59,12 +59,16 @@ function Register() {
   const googleSignup = async () => {
     setErrorMsg("");
     try {
+      console.log("Starting Google signup...");
+      console.log("Server URL:", serverUrl);
+      
       const response = await signInWithPopup(auth, provider)
       let user = response.user;
       let name = user.displayName;
       let email = user.email;
       console.log("Google user selected:", email);
       
+      console.log("Sending signup request to:", serverUrl + "/api/auth/googleLogin");
       const result = await axios.post(serverUrl + "/api/auth/googleLogin", {
         name,
         email
@@ -80,11 +84,20 @@ function Register() {
       await getCurrentUser();
       navigate("/");
     } catch (error) {
-      console.log("Google signup error:", error);
+      console.error("Google signup error details:", {
+        message: error.message,
+        response: error.response?.data,
+        status: error.response?.status,
+        code: error.code,
+      });
       if(error.code === "auth/popup-blocked") {
         setErrorMsg("Google signup popup was blocked. Please allow popups and try again.");
+      } else if(error.code === "auth/unauthorized-domain") {
+        setErrorMsg("Unauthorized domain. Please add your domain to Firebase authorized domains.");
       } else if(error.response) {
         setErrorMsg(error.response?.data?.message || "Google signup failed. Please try again.");
+      } else if(error.message === "Network Error") {
+        setErrorMsg("Cannot connect to server. Please check your internet connection and try again.");
       } else {
         setErrorMsg("Google signup failed: " + error.message);
       }

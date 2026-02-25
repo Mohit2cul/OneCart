@@ -17,15 +17,32 @@ const allowedOrigins = (process.env.CORS_ORIGINS || "")
   .map((origin) => origin.trim())
   .filter(Boolean);
 
+console.log("Environment:", process.env.NODE_ENV);
+console.log("Allowed Origins:", allowedOrigins);
+
 let app = express();
 app.use(express.json());
 app.use(cookieParser());
 app.use(
   cors({
-    origin: allowedOrigins.length
-      ? allowedOrigins
-      : ["http://localhost:5173", "http://localhost:5174"],
+    origin: function (origin, callback) {
+      // Allow requests with no origin (like mobile apps or curl requests)
+      if (!origin) return callback(null, true);
+      
+      const allowed = allowedOrigins.length
+        ? allowedOrigins
+        : ["http://localhost:5173", "http://localhost:5174"];
+      
+      if (allowed.includes(origin)) {
+        callback(null, true);
+      } else {
+        console.warn(`CORS blocked origin: ${origin}`);
+        callback(new Error("Not allowed by CORS"));
+      }
+    },
     credentials: true,
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"],
   })
 );
 
@@ -37,6 +54,17 @@ app.use("/api/order", orderRoutes);
 
 app.get("/", (req, res) => {
   res.send("Hello World!");
+});
+
+// CORS test endpoint
+app.get("/api/test-cors", (req, res) => {
+  res.json({
+    message: "CORS is working!",
+    origin: req.headers.origin,
+    cookies: req.cookies,
+    env: process.env.NODE_ENV,
+    allowedOrigins: allowedOrigins.length ? allowedOrigins : ["localhost"]
+  });
 });
 
 const start = async () => {
@@ -52,3 +80,5 @@ const start = async () => {
 };
 
 start();
+
+VITE_SERVER_URL="https://onecart-hkks.onrender.com"

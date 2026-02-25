@@ -56,12 +56,16 @@ function Login() {
   };
   const googleLogin = async () => {
     try {
+      console.log("Starting Google login...");
+      console.log("Server URL:", serverUrl);
+      
       const response = await signInWithPopup(auth, provider);
       let user = response.user;
       let name = user.displayName;
       let email = user.email;
       console.log("Google user selected:", email);
       
+      console.log("Sending login request to:", serverUrl + "/api/auth/googleLogin");
       const result = await axios.post(
         serverUrl + "/api/auth/googleLogin",
         {
@@ -81,11 +85,20 @@ function Login() {
       await getCurrentUser();
       navigate("/");
     } catch (error) {
-      console.log("Google login error:", error);
+      console.error("Google login error details:", {
+        message: error.message,
+        response: error.response?.data,
+        status: error.response?.status,
+        code: error.code,
+      });
       if(error.code === "auth/popup-blocked") {
         setErrorMsg("Google login popup was blocked. Please allow popups and try again.");
+      } else if(error.code === "auth/unauthorized-domain") {
+        setErrorMsg("Unauthorized domain. Please add your domain to Firebase authorized domains.");
       } else if(error.response) {
         setErrorMsg(error.response?.data?.message || "Google login failed. Please try again.");
+      } else if(error.message === "Network Error") {
+        setErrorMsg("Cannot connect to server. Please check your internet connection and try again.");
       } else {
         setErrorMsg("Google login failed: " + error.message);
       }
