@@ -57,7 +57,18 @@ export const listProducts = async (req, res) => {
 export const removeProduct = async (req, res) => {
     try {
         let {id} = req.params;
+        
+        if(!id) {
+            return res.status(400).json({message: "Product ID is required"});
+        }
+        
         const product = await Product.findByIdAndDelete(id);
+        
+        if(!product) {
+            return res.status(404).json({message: "Product not found"});
+        }
+        
+        console.log("Product deleted successfully:", id);
         return res.status(200).json({message: "Product deleted successfully", product});
     } catch (error) {
         console.log("Remove Product Backend Error:", error);

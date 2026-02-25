@@ -14,12 +14,22 @@ function Login() {
   const [show, setshow] = useState(false);
   const [email, setemail] = useState("");
   const [password, setpassword] = useState("");
+  const [username, setusername] = useState("");
+  const [errorMsg, setErrorMsg] = useState("");
   let { serverUrl } = useContext(authDataContext);
   let navigate = useNavigate();
-  let { getCurrentUser } = useContext(userDataContext);
+  let { getCurrentUser, userData } = useContext(userDataContext);
+
+  // Redirect to home if already logged in
+  React.useEffect(() => {
+    if (userData) {
+      navigate("/");
+    }
+  }, [userData, navigate]);
 
   const handleLogin = async (e) => {
     e.preventDefault();
+    setErrorMsg("");
     try {
       let result = await axios.post(
         serverUrl + "/api/auth/login",
@@ -31,11 +41,17 @@ function Login() {
           withCredentials: true,
         }
       );
-      console.log(result.data);
-      getCurrentUser();
+      console.log("Login successful:", result.data);
+      // Clear form fields
+      setemail("");
+      setpassword("");
+      setusername("");
+      // Refresh user data
+      await getCurrentUser();
       navigate("/");
     } catch (error) {
-      console.log(error);
+      console.log("Login error:", error);
+      setErrorMsg(error.response?.data?.message || "Login failed. Please try again.");
     }
   };
   const googleLogin = async () => {
@@ -44,6 +60,8 @@ function Login() {
       let user = response.user;
       let name = user.displayName;
       let email = user.email;
+      console.log("Google user selected:", email);
+      
       const result = await axios.post(
         serverUrl + "/api/auth/googleLogin",
         {
@@ -54,11 +72,23 @@ function Login() {
           withCredentials: true,
         }
       );
-      console.log(result.data);
-      getCurrentUser();
+      console.log("Google login successful:", result.data);
+      // Clear form fields
+      setemail("");
+      setpassword("");
+      setusername("");
+      // Refresh user data
+      await getCurrentUser();
       navigate("/");
     } catch (error) {
-      console.log(error);
+      console.log("Google login error:", error);
+      if(error.code === "auth/popup-blocked") {
+        setErrorMsg("Google login popup was blocked. Please allow popups and try again.");
+      } else if(error.response) {
+        setErrorMsg(error.response?.data?.message || "Google login failed. Please try again.");
+      } else {
+        setErrorMsg("Google login failed: " + error.message);
+      }
     }
   };
 
@@ -90,8 +120,13 @@ function Login() {
           className="w-[90%] h-[90%] flex flex-col items-center justify-start gap-[15px]"
           action=""
         >
+          {errorMsg && (
+            <div className="w-full text-center text-red-500 bg-red-100 rounded p-2 mb-2">
+              {errorMsg}
+            </div>
+          )}
           <div
-            className="w-[90%] h-[50px] bg-[#45656cae] rounded-lg flex items-center justify-center gap-[10px] py-[20px] cursor-pointer"
+            className="w-[90%] h-[50px] bg-[#45656cae] rounded-lg flex items-center justify-center gap-[10px] py-[20px] cursor-pointer hover:bg-[#2e4d52]"
             onClick={googleLogin}
           >
             <img
@@ -106,12 +141,13 @@ function Login() {
             OR
             <div className="w-[40%] h-[1px] bg-[#96969635]"></div>
           </div>
-          <div className="relative w-[90%] h-[350px] flex flex-col items-center justify-center gap-[15px]">
+          <div className="relative w-[90%] h-[380px] flex flex-col items-center justify-center gap-[15px]">
             <input
               type="text"
               className="w-full h-[50px] bg-[#45656cae] rounded-lg px-4"
               placeholder="UserName"
-              required
+              onChange={(e) => setusername(e.target.value)}
+              value={username}
             />
             <input
               type="email"

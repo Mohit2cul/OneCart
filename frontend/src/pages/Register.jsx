@@ -15,13 +15,21 @@ function Register() {
   const [name, setname] = useState("");
   const [email, setemail] = useState("");
   const [password, setpassword] = useState("");
-  // const [errorMsg, setErrorMsg] = useState("");
+  const [errorMsg, setErrorMsg] = useState("");
   let navigate = useNavigate();
   let { serverUrl } = useContext(authDataContext);
-  let { getCurrentUser } = useContext(userDataContext);
+  let { getCurrentUser, userData } = useContext(userDataContext);
+
+  // Redirect to home if already logged in
+  React.useEffect(() => {
+    if (userData) {
+      navigate("/");
+    }
+  }, [userData, navigate]);
 
   const handleSignup = async (e) => {
     e.preventDefault();
+    setErrorMsg("");
     try {
       const result = await axios.post(
         serverUrl + "/api/auth/register",
@@ -34,33 +42,52 @@ function Register() {
           withCredentials: true,
         }
       );
-      getCurrentUser();
+      console.log("Registration successful:", result.data);
+      // Clear form fields
+      setname("");
+      setemail("");
+      setpassword("");
+      // Refresh user data
+      await getCurrentUser();
       navigate("/");
-      console.log(result.data);
-      // Optionally redirect or show success
     } catch (error) {
-      console.log(error);
+      console.log("Registration error:", error);
+      setErrorMsg(error.response?.data?.message || "Registration failed. Please try again.");
     }
   };
 
   const googleSignup = async () => {
+    setErrorMsg("");
     try {
       const response = await signInWithPopup(auth, provider)
       let user = response.user;
       let name = user.displayName;
       let email = user.email;
+      console.log("Google user selected:", email);
+      
       const result = await axios.post(serverUrl + "/api/auth/googleLogin", {
         name,
         email
       },{
         withCredentials: true
       })
-      console.log(result.data);
-      getCurrentUser();
+      console.log("Google signup successful:", result.data);
+      // Clear form fields
+      setname("");
+      setemail("");
+      setpassword("");
+      // Refresh user data
+      await getCurrentUser();
       navigate("/");
-
     } catch (error) {
-      console.log(error);
+      console.log("Google signup error:", error);
+      if(error.code === "auth/popup-blocked") {
+        setErrorMsg("Google signup popup was blocked. Please allow popups and try again.");
+      } else if(error.response) {
+        setErrorMsg(error.response?.data?.message || "Google signup failed. Please try again.");
+      } else {
+        setErrorMsg("Google signup failed: " + error.message);
+      }
     }
   }
 
@@ -92,7 +119,12 @@ function Register() {
           className="w-[90%] h-[90%] flex flex-col items-center justify-start gap-[15px]"
           action=""
         >
-          <div className="w-[90%] h-[50px] bg-[#45656cae] rounded-lg flex items-center justify-center gap-[10px] py-[20px] cursor-pointer" onClick={googleSignup}>
+          {errorMsg && (
+            <div className="w-full text-center text-red-500 bg-red-100 rounded p-2 mb-2">
+              {errorMsg}
+            </div>
+          )}
+          <div className="w-[90%] h-[50px] bg-[#45656cae] rounded-lg flex items-center justify-center gap-[10px] py-[20px] cursor-pointer hover:bg-[#2e4d52]" onClick={googleSignup}>
             <img
               src={google}
               className="ml-2 w-[30px] bg-auto h-[30px] rounded-full"

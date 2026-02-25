@@ -43,23 +43,26 @@ export const register = async (req, res) => {
   }
 }
 
-// Get current user from JWT token in cookie
+// Get current user from JWT token in cookie (protected by isAuth middleware)
 export const getCurrentUser = async (req, res) => {
   try {
-    const token = req.cookies.token;
-    if (!token) {
-      return res.status(401).json({ message: "No token, authorization denied" });
+    const userId = req.userId;
+    console.log("Getting user with ID:", userId);
+    
+    if (!userId) {
+      return res.status(401).json({ message: "User ID not found in token" });
     }
     
-  const decoded = jwt.verify(token, process.env.JWT_SECRET);
-  const user = await User.findById(decoded.userId).select('-password');
+    const user = await User.findById(userId).select('-password');
     
     if (!user) {
       return res.status(404).json({ message: "User not found" });
     }
     
+    console.log("Current user fetched:", user.email);
     return res.status(200).json(user);
   } catch (error) {
+    console.log("Get current user error:", error.message);
     return res.status(500).json({ message: `Get current user error: ${error.message}` });
   }
 };
@@ -92,10 +95,16 @@ export const login = async (req, res) => {
 
 export const logout = async (req, res) => {
   try {
-    res.clearCookie("token");
+    res.clearCookie("token", {
+      httpOnly: true,
+      secure: false,
+      sameSite: "Strict",
+    });
+    console.log("User logged out successfully");
     return res.status(200).json({ message: "Logout successful" });
   } catch (error) {
-    return res.status(500).json({ message: `Logout error: ${error}` });
+    console.log("Logout error:", error.message);
+    return res.status(500).json({ message: `Logout error: ${error.message}` });
   }
 };
 
@@ -125,7 +134,9 @@ export const adminLogin = async (req, res) => {
   try {
     let { email, password } = req.body;
     if(email === process.env.ADMIN_EMAIL && password === process.env.ADMIN_PASSWORD){
-      let token = await genToken(email);
+      let token = jwt.sign({ adminEmail: email, role: "admin" }, process.env.JWT_SECRET, {
+        expiresIn: "1d",
+      });
       res.cookie("token", token, {
         httpOnly: true,
         secure: false,

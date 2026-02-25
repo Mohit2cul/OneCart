@@ -209,9 +209,9 @@ function Add() {
                 value={category}
               >
                 {/* <option value="">Select Category</option> */}
-                <option value="men">Men</option>
-                <option value="women">Women</option>
-                <option value="kids">Kids</option>
+                <option value="Men">Men</option>
+                <option value="Women">Women</option>
+                <option value="Kids">Kids</option>
               </select>
             </div>
             <div className="md:w-[30%] w-[100%] flex items-start sm:justify-center flex-col gap-[10px] ">

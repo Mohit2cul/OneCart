@@ -8,7 +8,7 @@ import { useState } from "react";
 
 export const userDataContext = createContext();
 function UserContext({ children }) {
-  const [userData, setuserData] = useState("");
+  const [userData, setuserData] = useState(null);
   let { serverUrl } = useContext(authDataContext);
 
   const getCurrentUser = async () => {
@@ -17,17 +17,19 @@ function UserContext({ children }) {
         serverUrl + "/api/auth/getCurrentUser",
         { withCredentials: true }
       )
+      console.log("User logged in:", result.data);
       setuserData(result.data);
-      console.log(result.data);
     } catch (error) {
+      console.log("No user logged in - Error status:", error.response?.status);
       setuserData(null);  
-      console.log(error);
     }
   };
 
   useEffect(() => {
+    console.log("UserContext - Checking for existing user session");
     getCurrentUser();
-  }, []);
+  }, [serverUrl]);
+  
   let value = {
     userData,
     setuserData,

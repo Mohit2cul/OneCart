@@ -17,13 +17,18 @@ function ShopContext({ children }) {
   const getProducts = async () => {
     try {
       let result = await axios.get(serverUrl + "/api/product/list");
-      if (result.data.products) {
+      console.log("Products fetched:", result.data);
+      if (result.data.products && Array.isArray(result.data.products)) {
         setProducts(result.data.products);
-      } else {
+      } else if (Array.isArray(result.data)) {
         setProducts(result.data);
+      } else {
+        console.warn("Unexpected response format:", result.data);
+        setProducts([]);
       }
     } catch (error) {
       console.error("Error fetching products:", error);
+      setProducts([]);
     }
   };
 
@@ -128,7 +133,7 @@ function ShopContext({ children }) {
 
   useEffect(() => {
     getUserCart();
-  }, []);
+  }, [userData]);
 
   let value = {
     products,

@@ -24,17 +24,22 @@ function List() {
 
   const removeListItem = async (id) => {
     try {
+      console.log("Removing product with id:", id);
       let result = await axios.post(`${serverUrl}/api/product/remove/${id}`, {}, { withCredentials: true });
-
-      if(result.data){
-        fetchList();
+      
+      console.log("Delete response:", result.data);
+      
+      if(result.status === 200) {
+        console.log("Product deleted successfully");
+        // Update state directly by filtering out the deleted product
+        setList(list.filter(item => item._id !== id));
       }
       else{
-        console.log("Error removing item");
-        
+        console.log("Error removing item - Status:", result.status);
       }
     } catch (error) {
-      console.error("Error removing item:", error);
+      console.error("Error removing item:", error.response?.data || error.message);
+      alert("Failed to remove product: " + (error.response?.data?.message || error.message));
     }
   }
 

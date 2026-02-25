@@ -25,13 +25,24 @@ function Navbar() {
 
   const handleLogout = async () => {
     try {
+      console.log("Starting logout...");
       const result = await axios.get(serverUrl + "/api/auth/logout", {
         withCredentials: true,
       });
-      console.log(result);
-      getCurrentUser();
+      console.log("Logout response:", result.data);
+      
+      // Wait for getCurrentUser to complete and clear userData
+      await getCurrentUser();
+      console.log("User data cleared, navigating to login");
+      
+      // Small delay to ensure state is updated
+      setTimeout(() => {
+        navigate("/login");
+      }, 300);
     } catch (error) {
-      console.log(error);
+      console.log("Logout error:", error);
+      // Even if logout fails, clear local state and redirect
+      navigate("/login");
     }
   };
   return (
@@ -125,7 +136,6 @@ function Navbar() {
                 onClick={() => {
                   handleLogout();
                   setshowProfile(false);
-                  navigate("/login");
                 }}
               >
                 Logout

@@ -7,13 +7,16 @@ const adminAuth = async (req, res, next) => {
             return res.status(403).json({ message: "No token provided" });
         }
         const decoded = jwt.verify(token, process.env.JWT_SECRET);
-        if (!decoded) {
-            return res.status(401).json({ message: "Unauthorized" });
+        console.log("Admin Auth - Decoded token:", decoded);
+        
+        if (!decoded || decoded.role !== "admin") {
+            return res.status(401).json({ message: "Unauthorized - Admin access required" });
         }
-        req.adminEmail = process.env.ADMIN_EMAIL;
+        req.adminEmail = decoded.adminEmail;
         next();
     } catch (error) {
-        return res.status(500).json({ message: "Admin auth error" });
+        console.log("Admin Auth Error:", error.message);
+        return res.status(500).json({ message: "Admin auth error: " + error.message });
     }
 };
 
