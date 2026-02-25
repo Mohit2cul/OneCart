@@ -108,18 +108,42 @@ export const logout = async (req, res) => {
 
 export const googleLogin = async (req, res) => {
   try {
+    console.log("Google login request received");
     let { name, email } = req.body;
+    
+    if (!name || !email) {
+      console.log("Missing name or email in request");
+      return res.status(400).json({ message: "Name and email are required" });
+    }
+    
+    console.log("Looking for user with email:", email);
     let user = await User.findOne({email});
+    
     if (!user) {
+      console.log("User not found, creating new user");
       user = await User.create({ name, email });
+      console.log("New user created:", user._id);
+    } else {
+      console.log("Existing user found:", user._id);
     }
     
     let token = await genToken(user._id);
+    console.log("Token generated successfully");
+    
     res.cookie("token", token, getCookieOptions(7 * 24 * 60 * 60 * 1000));
-    return res.status(200).json({ name: user.name, email: user.email });
+    console.log("Cookie set with options:", getCookieOptions(7 * 24 * 60 * 60 * 1000));
+    
+    return res.status(200).json({ 
+      name: user.name, 
+      email: user.email,
+      success: true 
+    });
   } catch (error) {
-    console.log("google login error:", error);
-    return res.status(500).json({ message: "Google login error", error });
+    console.error("Google login error:", error);
+    return res.status(500).json({ 
+      message: "Google login failed", 
+      error: error.message 
+    });
   }
 };
 
